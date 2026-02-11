@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
 import {
     MessageCircle, Target, Repeat, BarChart3, User, Brain, Star, Settings,
-    PanelLeftClose, PanelLeftOpen, Sparkles
+    PanelLeftClose, PanelLeftOpen, Sparkles, ClipboardList
 } from 'lucide-react'
 
 const navItems = [
     { path: '/', label: 'Chat', icon: MessageCircle },
+    { path: '/registros', label: 'Registros', icon: ClipboardList },
     { path: '/metas', label: 'Metas', icon: Target },
     { path: '/habitos', label: 'Hábitos y Actividades', icon: Repeat },
     { path: '/graficos', label: 'Gráficos y Datos', icon: BarChart3 },

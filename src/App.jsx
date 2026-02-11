@@ -9,6 +9,7 @@ import PerfilPage from './pages/PerfilPage'
 import EstructurasPage from './pages/EstructurasPage'
 import AmbicionesPage from './pages/AmbicionesPage'
 import ConfigPage from './pages/ConfigPage'
+import RegistrosPage from './pages/RegistrosPage'
 import { getProfile } from './services/supabase'
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<ChatPage profile={profile} />} />
+            <Route path="/registros" element={<RegistrosPage profile={profile} />} />
             <Route path="/metas" element={<MetasPage profile={profile} />} />
             <Route path="/habitos" element={<HabitosPage profile={profile} />} />
             <Route path="/graficos" element={<GraficosPage profile={profile} />} />
