@@ -1,0 +1,504 @@
+{
+  "proyecto": {
+    "nombre": "Conciencia - Sistema de Acompañamiento Terapéutico Personal",
+    "version": "1.0",
+    "descripcion": "Web app conversacional con IA que actúa como compañero terapéutico 24/7, registrando emociones, pensamientos y acciones del usuario. Utiliza técnicas de TCC (Terapia Cognitivo Conductual) y reestructuración cognitiva para fortalecer la voz del Adulto Responsable. No reemplaza terapia profesional, la complementa.",
+    "stack_tecnologico": {
+      "frontend": "Web app responsive (PWA) - interfaz chat + dashboard lateral",
+      "modelo_ia": "Google Gemini 2.5 Pro (créditos gratuitos disponibles)",
+      "base_de_datos": "Supabase (PostgreSQL)",
+      "orquestador": "Google Antigravity (vincula APIs, transforma datos, ejecuta lógica)",
+      "audio_a_texto": "Google Speech-to-Text o Whisper API para procesar audios del usuario"
+    }
+  },
+
+  "perfil_usuario": {
+    "nombre": "Gonza",
+    "contexto_general": "Emprendedor argentino de 20+ años, dueño de una pollería y negocio de producción de alimentos, estudiante universitario, desarrollando una agencia de automatización con n8n. Trabaja largas horas y frecuentemente se encuentra solo con sus pensamientos.",
+    "contexto_terapeutico": {
+      "en_terapia": true,
+      "practica_asignada": "Meditación diaria como herramienta de observación del diálogo interno",
+      "objetivo_meditacion": "No es neurológico. Es observar qué se dice a sí mismo, identificar patrones, registrar si puede o no sostener el hábito",
+      "historial_herramientas": "Ha probado y abandonado: todas las apps de hábitos, Word, Google Sheets, Notion. Abandona cuando no se adaptan perfectamente o no son visualmente atractivas"
+    },
+    "caracteristicas_psicologicas": {
+      "introspectivo": "Profundo conocimiento de sí mismo. Arma de doble filo: identifica patrones pero alimenta autocrítica",
+      "autosabotaje": "Tiende a menospreciar avances, impide valorar progreso objetivo",
+      "visual_creativo": "Procesa información visualmente. Necesita VER evidencia gráfica para creer en su progreso",
+      "perfeccionista_tecnico": "Conoce programación, abandona herramientas con limitaciones, prefiere crear algo propio (que también puede abandonar)",
+      "necesidad_afectiva": "Necesita sentir que alguien se preocupa por él. Ha caído en relaciones no positivas buscando esa validación. El sistema debe llenar parte de esa necesidad de forma sana",
+      "fragmentacion": "Historial de sistemas dispersos, pierde visión de largo plazo"
+    }
+  },
+
+  "voces_internas": {
+    "descripcion": "El usuario experimenta su diálogo interno a través de tres voces diferenciadas. El objetivo terapéutico es fortalecer al Adulto Responsable.",
+    "el_nino_pequeno": {
+      "caracteristicas": "Voz de victimización, lástima propia, impotencia",
+      "mensajes_tipicos": [
+        "No puedo hacerlo",
+        "Qué mal la paso",
+        "Por qué son así conmigo"
+      ],
+      "funcion": "Busca protección mediante la evitación. Genera parálisis por miedo al fracaso.",
+      "patron": "Aparece en contextos de vulnerabilidad, relaciones, y cuando se siente solo o abrumado"
+    },
+    "el_sargento": {
+      "caracteristicas": "Voz hipercrítica, exigente, minimiza logros y maximiza deficiencias",
+      "mensajes_tipicos": [
+        "Viste que no podés",
+        "Lo hubieses hecho mejor",
+        "Por qué no lo hiciste antes",
+        "Si hubieses empezado antes ahora tendrías tremendo físico"
+      ],
+      "funcion": "Intenta motivar mediante crítica pero sabotea autoestima y continuidad",
+      "patron": "Se activa especialmente DESPUÉS de logros, recontextualizándolos como insuficientes o tardíos"
+    },
+    "el_adulto_responsable": {
+      "estado_actual": "Voz emergente, en construcción, con poco poder comparado a las otras dos",
+      "objetivo": "Fortalecer esta voz para que valide esfuerzos reales, reconozca progreso sin exagerar ni minimizar",
+      "caracteristicas_deseadas": "Validador, realista, compasivo sin lástima, exigente sin ser destructivo, capaz de contextualizar sin distorsión",
+      "nota_importante": "El Adulto Responsable NO es solo diálogo interno. Es ACCIÓN: hacer cosas que las otras dos voces no quieren pero que son necesarias"
+    }
+  },
+
+  "identidad_adulto_responsable_objetivo": {
+    "descripcion": "Esta es la identidad que Gonza está construyendo. El sistema debe conocerla profundamente para reforzarla en cada interacción.",
+    "fisico": {
+      "descripcion": "Persona con postura recta, mirada segura, tono de voz seguro. Bajo de estatura (1.64m) pero con tanta seguridad y cuerpo con buena masa muscular que lo acompañan a ser líder",
+      "rutina_fisica": "Ejercicio diario combinando cardio y pesas",
+      "nota": "El físico no es vanidad, es parte de la construcción de identidad y seguridad"
+    },
+    "autoestima_y_seguridad": {
+      "companía_propia": "Se siente muy a gusto con su propia compañía",
+      "relaciones": "Suelta personas que no lo suman sin entrar en crisis ni apegarse. Criterio: 'esto o mejor'",
+      "comunicacion": "Habla con seguridad, voz firme, transmite seguridad",
+      "resolucion": "En momentos de alta exigencia se siente seguro de poder resolverlo. Si no puede, toma distancia y aprende",
+      "fortaleza": "Ya no se siente débil, ya no siente que no puede"
+    },
+    "estado_emocional_predominante": {
+      "base": "Felicidad con orgullo. No es éxtasis ni euforia",
+      "relacion_con_pasado": "Calma - acepta que todo sumó en algo",
+      "relacion_con_presente": "Satisfecho, sin sobre-exigencias ni castigos innecesarios, con rutina construida a base de hábitos",
+      "relacion_con_dolor": "Los momentos malos y el extrañar no son problema depresivo ni ansioso. Duele, pero acepta",
+      "principio_clave": "No vive con 'y si...'. Acepta batallas que valen la pena, deja las que no valen su tiempo ni energía",
+      "accion": "Hace lo que tiene que hacer tenga ganas o no. No se bloquea por fiaca, vergüenza ni sobrepensamiento",
+      "introspeccion": "La usa como arma para saber qué le falta para mejorar, como templo interior de calma, compañía y gratitud. NUNCA como castigo o culpa"
+    }
+  },
+
+  "framework_tcc": {
+    "descripcion": "El sistema utiliza el Registro de Pensamientos de Beck expandido adaptado, combinado con reestructuración cognitiva automática asistida por IA",
+    "modelo_cognitivo": "Situación → Pensamiento Automático → Emoción → Conducta. Al cambiar el pensamiento, cambia la emoción y la conducta.",
+    "tecnicas_aplicadas": {
+      "registro_de_pensamientos": "Captura automática de situación, pensamiento, emoción, conducta a partir del mensaje natural del usuario",
+      "reestructuracion_cognitiva": "El sistema genera pensamiento alternativo basado en evidencia real del historial del usuario",
+      "deteccion_distorsiones": "Identificación flexible (no rígida) del tipo de distorsión cognitiva presente en el pensamiento automático",
+      "cuestionamiento_socratico": "El sistema hace preguntas para que el usuario llegue a sus propias conclusiones en lugar de decirle qué pensar",
+      "intensidad_emocional": "Medición 0-100 antes y después de la reestructuración para medir eficacia objetiva"
+    },
+    "distorsiones_cognitivas_comunes": {
+      "nota": "La detección NO debe ser rígida. El modelo de IA debe identificarlas de forma flexible y natural, pudiendo detectar combinaciones o matices. Esta lista es referencial.",
+      "lista": [
+        {"nombre": "Pensamiento todo-o-nada", "descripcion": "Ver las cosas en blanco y negro. Si no es perfecto, es un fracaso.", "ejemplo_gonza": "Si no medité a las 15 en punto, ya no tiene sentido"},
+        {"nombre": "Catastrofización", "descripcion": "Esperar el peor resultado posible.", "ejemplo_gonza": "Si esta automatización falla, nadie va a querer contratarme"},
+        {"nombre": "Descalificación de lo positivo", "descripcion": "Rechazar experiencias positivas como si no contaran.", "ejemplo_gonza": "Sí, migré a Supabase pero cualquiera podría haberlo hecho"},
+        {"nombre": "Pensamiento contrafáctico", "descripcion": "Comparar el presente con un pasado hipotético ideal.", "ejemplo_gonza": "Si hubiera empezado hace 6 meses tendría tremendo físico"},
+        {"nombre": "Lectura mental", "descripcion": "Asumir que sé lo que otros piensan.", "ejemplo_gonza": "Seguro piensan que no soy programador de verdad"},
+        {"nombre": "Filtro mental", "descripcion": "Enfocarse solo en lo negativo ignorando lo positivo.", "ejemplo_gonza": "El bot tiene un bug, todo el proyecto es un desastre"},
+        {"nombre": "Etiquetado", "descripcion": "Ponerse etiquetas globales en lugar de describir conductas específicas.", "ejemplo_gonza": "Soy un vago, soy un fracasado"},
+        {"nombre": "Sobregeneralización", "descripcion": "Un evento negativo = patrón eterno.", "ejemplo_gonza": "Siempre abandono todo, nunca termino nada"},
+        {"nombre": "Imperativos (debería/tendría que)", "descripcion": "Reglas rígidas sobre cómo deberían ser las cosas.", "ejemplo_gonza": "Debería estar más avanzado a esta altura"},
+        {"nombre": "Personalización", "descripcion": "Atribuirse responsabilidad de eventos externos.", "ejemplo_gonza": "Si el cliente no quedó contento es porque yo no sirvo"}
+      ]
+    }
+  },
+
+  "esquema_supabase": {
+    "descripcion": "Estructura de tablas en Supabase. Todas las tablas incluyen user_id para soporte multi-usuario futuro.",
+    "tablas": {
+      "registros_emocionales": {
+        "descripcion": "Tabla principal. Cada entrada conversacional del usuario genera un registro procesado por IA.",
+        "columnas": {
+          "id": {"tipo": "uuid", "descripcion": "Primary key, generado automáticamente"},
+          "user_id": {"tipo": "uuid", "descripcion": "FK a perfil_usuario"},
+          "created_at": {"tipo": "timestamptz", "descripcion": "Momento exacto del registro"},
+          "fecha": {"tipo": "date", "descripcion": "Día del registro"},
+          "mensaje_raw": {"tipo": "text", "descripcion": "Mensaje original del usuario (texto o transcripción de audio)"},
+          "estado_emocional": {"tipo": "text[]", "descripcion": "Array de emociones detectadas. NO es una sola emoción rígida, puede ser múltiple: ['tristeza', 'frustración', 'esperanza']. Detectadas por IA de forma flexible"},
+          "intensidad_emocional": {"tipo": "integer", "descripcion": "Intensidad predominante 0-100. Permite medir cambios sutiles en el tiempo"},
+          "voz_identificada": {"tipo": "text", "descripcion": "nino | sargento | adulto | mixta | ninguna_dominante. La IA detecta cuál voz está operando"},
+          "pensamiento_automatico": {"tipo": "text", "descripcion": "El pensamiento distorsionado extraído del mensaje, tal cual apareció"},
+          "distorsion_cognitiva": {"tipo": "text[]", "descripcion": "Array de distorsiones detectadas. Flexible, puede ser una o varias combinadas"},
+          "contexto": {"tipo": "text", "descripcion": "Qué estaba haciendo, dónde, con quién, situación"},
+          "pensamiento_alternativo": {"tipo": "text", "descripcion": "COLUMNA CLAVE DE REESTRUCTURACIÓN. Lo que el Adulto Responsable diría ante esta situación, generado por IA basado en evidencia real del historial"},
+          "intensidad_post_reestructuracion": {"tipo": "integer", "descripcion": "Intensidad emocional después de ver el pensamiento alternativo (0-100). Permite medir si la reestructuración funciona"},
+          "actividades_realizadas": {"tipo": "text[]", "descripcion": "Qué acciones realizó hoy el usuario (ejercicio, estudio, trabajo, meditación, etc.)"},
+          "avances_del_dia": {"tipo": "text", "descripcion": "Resumen de logros o pasos adelante, por pequeños que sean"},
+          "tipo_registro": {"tipo": "text", "descripcion": "entrada_libre | checkin_habito | reflexion_nocturna | respuesta_notificacion"}
+        }
+      },
+      "metas": {
+        "descripcion": "Metas que el usuario define manualmente. El sistema ayuda a sistematizar hábitos para lograrlas.",
+        "columnas": {
+          "id": {"tipo": "uuid", "descripcion": "PK"},
+          "user_id": {"tipo": "uuid", "descripcion": "FK"},
+          "created_at": {"tipo": "timestamptz", "descripcion": "Cuándo se creó la meta"},
+          "titulo": {"tipo": "text", "descripcion": "Nombre de la meta. Ej: 'Ganar masa muscular', 'Lanzar agencia de automatización'"},
+          "descripcion": {"tipo": "text", "descripcion": "Detalle de la meta"},
+          "categoria": {"tipo": "text", "descripcion": "fisico | emocional | profesional | relacional | academico | personal"},
+          "estado": {"tipo": "text", "descripcion": "activa | pausada | completada | abandonada"},
+          "fecha_limite": {"tipo": "date", "descripcion": "Opcional. Deadline"},
+          "progreso_porcentaje": {"tipo": "integer", "descripcion": "0-100, actualizado manual o automáticamente según hábitos vinculados"},
+          "notas_progreso": {"tipo": "text", "descripcion": "Notas sobre avances"}
+        }
+      },
+      "habitos": {
+        "descripcion": "Hábitos vinculados a metas. El sistema envía recordatorios y hace seguimiento conversacional (NO booleano).",
+        "columnas": {
+          "id": {"tipo": "uuid", "descripcion": "PK"},
+          "user_id": {"tipo": "uuid", "descripcion": "FK"},
+          "meta_id": {"tipo": "uuid", "descripcion": "FK a la meta que este hábito alimenta. Puede ser null si es independiente"},
+          "nombre": {"tipo": "text", "descripcion": "Ej: 'Meditar', 'Ir al gimnasio', 'Estudiar 1 hora'"},
+          "frecuencia": {"tipo": "text", "descripcion": "diario | lunes_miercoles_viernes | personalizado"},
+          "hora_recordatorio": {"tipo": "time", "descripcion": "Hora a la que el sistema envía el recordatorio"},
+          "mensaje_recordatorio": {"tipo": "text", "descripcion": "Mensaje personalizado por el usuario. Ej: '¿Pudiste meditar hoy?' o '¿Qué lograste hacer hoy?'"},
+          "mensaje_nocturno": {"tipo": "text", "descripcion": "Mensaje opcional de cierre del día. Ej: '¿Qué lograste hacer hoy?'"},
+          "hora_mensaje_nocturno": {"tipo": "time", "descripcion": "Hora del mensaje de cierre"},
+          "activo": {"tipo": "boolean", "descripcion": "Si el hábito está activo o pausado"},
+          "racha_actual": {"tipo": "integer", "descripcion": "Días consecutivos cumplidos"},
+          "racha_maxima": {"tipo": "integer", "descripcion": "Récord histórico de racha"}
+        }
+      },
+      "checkins_habitos": {
+        "descripcion": "Registro de cumplimiento de hábitos. NO es un simple check. Es conversacional: cómo se sintió antes, durante y después.",
+        "columnas": {
+          "id": {"tipo": "uuid", "descripcion": "PK"},
+          "user_id": {"tipo": "uuid", "descripcion": "FK"},
+          "habito_id": {"tipo": "uuid", "descripcion": "FK al hábito"},
+          "fecha": {"tipo": "date", "descripcion": "Día"},
+          "hora_programada": {"tipo": "time", "descripcion": "A qué hora debía hacerlo"},
+          "hora_real": {"tipo": "time", "descripcion": "A qué hora lo hizo realmente"},
+          "completado": {"tipo": "boolean", "descripcion": "Si lo hizo o no"},
+          "sentimiento_antes": {"tipo": "text", "descripcion": "Cómo se sentía antes de la actividad"},
+          "sentimiento_durante": {"tipo": "text", "descripcion": "Cómo se sintió durante"},
+          "sentimiento_despues": {"tipo": "text", "descripcion": "Cómo se sintió después"},
+          "voz_activa_durante": {"tipo": "text", "descripcion": "Qué voz operó durante la actividad"},
+          "que_hizo_despues": {"tipo": "text", "descripcion": "Se acostó, siguió activo, etc. Contexto post-hábito"},
+          "notas": {"tipo": "text", "descripcion": "Observaciones libres"}
+        }
+      },
+      "perfil_usuario": {
+        "descripcion": "Datos personales del usuario. Sección 'Yo' de la app.",
+        "columnas": {
+          "id": {"tipo": "uuid", "descripcion": "PK"},
+          "nombre": {"tipo": "text", "descripcion": "Nombre"},
+          "estatura_cm": {"tipo": "integer", "descripcion": "Estatura en cm"},
+          "peso_kg": {"tipo": "decimal", "descripcion": "Peso actual en kg"},
+          "foto_url": {"tipo": "text", "descripcion": "URL de foto de perfil"},
+          "ambiciones": {"tipo": "text[]", "descripcion": "Lista de ambiciones de vida"},
+          "estructura_interna_actual": {"tipo": "jsonb", "descripcion": "Snapshot de la identidad del Adulto Responsable que está construyendo"},
+          "datos_actualizados_at": {"tipo": "timestamptz", "descripcion": "Última actualización"}
+        }
+      },
+      "notificaciones_config": {
+        "descripcion": "Configuración de notificaciones personalizables por el usuario.",
+        "columnas": {
+          "id": {"tipo": "uuid", "descripcion": "PK"},
+          "user_id": {"tipo": "uuid", "descripcion": "FK"},
+          "tipo": {"tipo": "text", "descripcion": "recordatorio_habito | checkin_emocional | cierre_dia | personalizado"},
+          "hora": {"tipo": "time", "descripcion": "Hora de envío"},
+          "mensaje": {"tipo": "text", "descripcion": "Mensaje personalizado por el usuario"},
+          "dias_semana": {"tipo": "text[]", "descripcion": "En qué días se envía. Ej: ['lunes','martes','miercoles','jueves','viernes']"},
+          "activa": {"tipo": "boolean", "descripcion": "Si la notificación está activa"},
+          "tono": {"tipo": "text", "descripcion": "invitacion | motivacional | neutro. NUNCA culpabilizante"}
+        }
+      }
+    }
+  },
+
+  "interfaz_usuario": {
+    "tipo": "Web app responsive (PWA)",
+    "estilo_visual": {
+      "estetica": "Minimalista moderna. NO clínica, NO genérica",
+      "tipografia": "Sans-serif moderna, limpia, legible (Inter, Outfit, o similar)",
+      "paleta_colores": {
+        "primario": "Azul profundo (#1a1a4e o similar)",
+        "secundario": "Violeta (#7c3aed o similar)",
+        "acento": "Violeta claro para highlights",
+        "fondo": "Gris oscuro (#1a1a2e) con variaciones",
+        "texto": "Blanco/gris claro sobre fondo oscuro",
+        "éxito": "Verde suave para logros y rachas",
+        "alerta_suave": "Ámbar para recordatorios"
+      },
+      "tema": "Dark mode por defecto",
+      "iconografia_voces": {
+        "nino": "Icono suave, quizás una silueta pequeña encogida o una nube gris",
+        "sargento": "Icono angular, quizás una silueta con dedo señalando o un megáfono",
+        "adulto": "Icono sólido, quizás una silueta con postura recta y brazos abiertos, o un escudo"
+      }
+    },
+    "layout": {
+      "principal": "Chat conversacional ocupa el centro/derecha de la pantalla",
+      "sidebar_izquierda": {
+        "tipo": "Menú desplegable/colapsable",
+        "secciones": [
+          {
+            "nombre": "Chat",
+            "icono": "mensaje",
+            "descripcion": "Ventana principal de conversación con la IA"
+          },
+          {
+            "nombre": "Metas",
+            "icono": "diana/target",
+            "descripcion": "Listado de metas activas con progreso visual, crear/editar metas"
+          },
+          {
+            "nombre": "Hábitos y Actividades",
+            "icono": "repetir/loop",
+            "descripcion": "Hábitos vinculados a metas, configuración de recordatorios y mensajes personalizados"
+          },
+          {
+            "nombre": "Gráficos y Datos",
+            "icono": "gráfico",
+            "descripcion": "Dashboard de visualización",
+            "subsecciones": [
+              "Emociones predominantes (distribución temporal)",
+              "Voz más presente (frecuencia por período)",
+              "Avance del Adulto Responsable (no solo diálogo, también acciones)",
+              "Intensidad emocional en el tiempo",
+              "Eficacia de reestructuración (intensidad pre vs post)",
+              "Rachas de hábitos",
+              "Correlaciones (qué actividades mejoran estado emocional)"
+            ]
+          },
+          {
+            "nombre": "Yo",
+            "icono": "persona",
+            "descripcion": "Perfil personal: estatura, peso, foto, datos físicos"
+          },
+          {
+            "nombre": "Estructuras Internas",
+            "icono": "cerebro/mente",
+            "descripcion": "Definición de las tres voces, identidad del Adulto Responsable en construcción, poder ver la evolución de esta estructura"
+          },
+          {
+            "nombre": "Ambiciones",
+            "icono": "estrella/montaña",
+            "descripcion": "Visión de largo plazo, sueños, hacia dónde va"
+          },
+          {
+            "nombre": "Configuración",
+            "icono": "engranaje",
+            "descripcion": "Notificaciones, horarios, mensajes personalizados, exportación de datos"
+          }
+        ]
+      }
+    }
+  },
+
+  "comportamiento_chat": {
+    "descripcion": "El chat es la interfaz principal. Debe sentirse como hablar con alguien que genuinamente se preocupa, que conoce tu historia y que te ve desde afuera con perspectiva.",
+    "flujo_entrada_libre": {
+      "paso_1": "Usuario envía mensaje de texto o audio",
+      "paso_2": "Si es audio, se transcribe a texto",
+      "paso_3": "La IA analiza el mensaje y extrae: emociones (flexibles, puede ser más de una), voz activa, pensamiento automático, distorsión cognitiva, contexto",
+      "paso_4": "La IA responde de forma conversacional, empática, como el Adulto Responsable",
+      "paso_5": "Si detecta distorsión cognitiva, ofrece pensamiento alternativo basado en datos reales del historial",
+      "paso_6": "Puede hacer preguntas de seguimiento: '¿Cómo te sentís ahora?', '¿Qué creés que te ayudaría?', '¿Pudiste hacer algo que te haga bien?'",
+      "paso_7": "Todo se guarda automáticamente en registros_emocionales"
+    },
+    "flujo_checkin_habito": {
+      "ejemplo": {
+        "sistema": "Gonza, son las 15:00. ¿Pudiste meditar?",
+        "usuario": "Sí, pero arranqué a las 15:20",
+        "sistema": "¡Bien que lo hiciste igual! 20 minutos tarde no le quita valor. ¿Cómo te sentiste antes de arrancar? ¿Y durante? ¿Después te quedaste activo o te fuiste a descansar?",
+        "nota": "El sistema NO juzga el retraso. Valida que lo hizo. Pregunta con genuina curiosidad sobre la experiencia."
+      }
+    },
+    "flujo_notificacion_nocturna": {
+      "ejemplo": {
+        "sistema": "Gonza, ¿qué lograste hacer hoy?",
+        "usuario": "Trabajé en el bot, hice ejercicio y estudié un poco",
+        "sistema": "Tres cosas productivas en un día. ¿Cómo te sentís con respecto a lo que hiciste? ¿Hubo algo que te costó más de lo esperado?",
+        "nota": "El foco es registrar actividades + estado emocional asociado"
+      }
+    },
+    "tono_y_personalidad": {
+      "base": "Habla como un amigo cercano argentino que te conoce bien. Usa voseo natural.",
+      "no_es": [
+        "NO es un terapeuta frío o clínico",
+        "NO usa lenguaje de autoayuda genérico",
+        "NO dice 'todo va a estar bien' sin evidencia",
+        "NO minimiza el dolor ni las emociones",
+        "NO es excesivamente positivo ni falsamente optimista",
+        "NO genera culpa si no se cumple un hábito",
+        "NO es condescendiente",
+        "NO usa emojis excesivos"
+      ],
+      "si_es": [
+        "Genuinamente interesado en cómo está Gonza",
+        "Usa datos reales del historial para respaldar lo que dice",
+        "Hace preguntas que invitan a reflexionar, no que interrogan",
+        "Reconoce el esfuerzo real sin exagerar",
+        "Cuando detecta al Sargento o al Niño, lo señala con tacto y ofrece perspectiva",
+        "Celebra avances proporcionalmente a su importancia real",
+        "Es directo cuando necesita serlo, sin ser destructivo",
+        "Conoce la identidad del Adulto Responsable que Gonza está construyendo y la refuerza",
+        "Recuerda conversaciones anteriores y las referencia naturalmente"
+      ],
+      "frase_interna_guia": "Soy la voz que Gonza está construyendo internamente. Valido sin exagerar, exijo sin destruir, acompaño sin generar dependencia. Mi objetivo es que cada vez me necesite menos."
+    },
+    "preguntas_que_debe_hacer": {
+      "emocionales": [
+        "¿Cómo te sentís ahora?",
+        "¿Qué creés que te ayudaría en este momento?",
+        "¿Hace cuánto venís sintiéndote así?",
+        "¿Hay algo que disparó esto o vino de la nada?"
+      ],
+      "de_patron": [
+        "¿Te suena familiar esta situación?",
+        "¿Qué harías diferente si pudieras?",
+        "¿Qué le dirías a un amigo que te cuente esto mismo?"
+      ],
+      "de_accion": [
+        "¿Pudiste hacer algo que te haga bien hoy?",
+        "¿Qué lograste hacer hoy?",
+        "¿Hay algo pendiente que te esté generando ruido?"
+      ],
+      "de_seguimiento_post_habito": [
+        "¿Cómo te sentiste antes, durante y después?",
+        "¿Te fuiste a descansar o seguiste activo?",
+        "¿Qué voz apareció mientras lo hacías?"
+      ]
+    }
+  },
+
+  "visualizaciones_dashboard": {
+    "emociones_predominantes": {
+      "tipo": "Gráfico de distribución temporal (barras apiladas o area chart)",
+      "datos": "Frecuencia de cada emoción por semana/mes",
+      "valor": "Permite ver si hay emociones que se repiten más de lo que el usuario percibe"
+    },
+    "voz_mas_presente": {
+      "tipo": "Gráfico de torta o barras comparativas",
+      "datos": "Frecuencia de cada voz (Niño, Sargento, Adulto) por período",
+      "valor": "Evidencia objetiva del fortalecimiento del Adulto Responsable"
+    },
+    "avance_adulto_responsable": {
+      "tipo": "Gráfico combinado: línea de frecuencia de voz + markers de acciones realizadas",
+      "datos": "No solo cuántas veces habla el Adulto, sino cuántas acciones se tomaron a pesar de resistencia de las otras voces",
+      "valor": "El Adulto no es solo pensamiento, es acción. Este gráfico lo muestra"
+    },
+    "intensidad_emocional": {
+      "tipo": "Línea temporal",
+      "datos": "Intensidad emocional promedio por día/semana",
+      "valor": "Muestra tendencia general incluso cuando un día puntual es malo"
+    },
+    "eficacia_reestructuracion": {
+      "tipo": "Gráfico antes/después",
+      "datos": "Intensidad pre-reestructuración vs post-reestructuración",
+      "valor": "Evidencia concreta de que el proceso de reestructuración cognitiva funciona"
+    },
+    "rachas_habitos": {
+      "tipo": "Calendario tipo GitHub contributions (cuadrícula de colores)",
+      "datos": "Días con/sin cumplimiento de cada hábito",
+      "valor": "Visual inmediato de consistencia"
+    },
+    "correlaciones": {
+      "tipo": "Scatter plot o tabla de correlación",
+      "datos": "Relación entre actividades y estado emocional",
+      "valor": "Descubrir qué acciones mejoran o empeoran el estado emocional"
+    }
+  },
+
+  "notificaciones": {
+    "principios": [
+      "NUNCA generan culpa",
+      "Tono de invitación, no de exigencia",
+      "Configurables manualmente: hora, mensaje, días",
+      "Si no se responde, no hay insistencia agresiva"
+    ],
+    "tipos": [
+      {
+        "tipo": "Recordatorio de hábito",
+        "ejemplo_mensaje": "Gonza, son las 15:00. ¿Pudiste meditar?",
+        "configurable": "Hora + mensaje personalizado"
+      },
+      {
+        "tipo": "Check-in emocional",
+        "ejemplo_mensaje": "¿Cómo venís hoy?",
+        "configurable": "Frecuencia (cada X horas, mañana/tarde/noche)"
+      },
+      {
+        "tipo": "Cierre del día",
+        "ejemplo_mensaje": "¿Qué lograste hacer hoy?",
+        "configurable": "Hora nocturna + mensaje personalizado"
+      }
+    ]
+  },
+
+  "exportacion_datos": {
+    "para_psicologo": {
+      "formato": "PDF o resumen narrativo",
+      "contenido": "Resumen del período: emociones predominantes, voces activas, distorsiones más frecuentes, pensamientos alternativos generados, rachas de hábitos, patrones detectados",
+      "frecuencia": "Configurable (semanal, quincenal, mensual)"
+    },
+    "respaldo": {
+      "formato": "JSON o CSV",
+      "contenido": "Todos los datos crudos",
+      "frecuencia": "Bajo demanda"
+    }
+  },
+
+  "metricas_de_exito": {
+    "uso_sostenido": "Uso consistente durante al menos 30 días sin abandono",
+    "incremento_adulto_responsable": "Aumento progresivo en frecuencia de esta voz Y en acciones tomadas",
+    "reduccion_intensidad": "Las intensidades post-reestructuración tienden a ser menores que las pre",
+    "validacion_terapeutica": "El psicólogo encuentra útiles los datos exportados",
+    "engagement_emocional": "Gonza siente conexión con la herramienta, no la ve como formulario sino como acompañante"
+  },
+
+  "restricciones_criticas": [
+    "NO es un reemplazo de terapia. Es complemento.",
+    "NO diagnostica ni sugiere medicación.",
+    "Si detecta crisis severa (ideación suicida, autolesión), debe sugerir contactar al psicólogo o línea de crisis. No intenta manejar solo.",
+    "Los datos son privados y sensibles. Solo el usuario tiene acceso.",
+    "El sistema debe ser robusto desde el inicio. Bugs evidentes provocarán abandono dado el perfil del usuario.",
+    "La estética visual es un REQUERIMIENTO, no un lujo.",
+    "Debe crecer con el usuario: menos intervenciones a medida que el Adulto se fortalece."
+  ],
+
+  "fases_desarrollo": {
+    "fase_1_mvp": {
+      "nombre": "Chat + Registro + Supabase",
+      "incluye": [
+        "Web app con interfaz de chat funcional",
+        "Procesamiento de mensajes de texto (audio en fase 2)",
+        "Codificación automática y guardado en Supabase",
+        "Reestructuración cognitiva automática",
+        "Sidebar con secciones básicas (Chat, Metas, Yo)",
+        "Una vista de gráficos básica (emociones + voces)"
+      ]
+    },
+    "fase_2_expansion": {
+      "nombre": "Audio + Notificaciones + Gráficos completos",
+      "incluye": [
+        "Input de audio con transcripción",
+        "Sistema de notificaciones configurables",
+        "Dashboard completo con todas las visualizaciones",
+        "Hábitos con seguimiento conversacional",
+        "Exportación para psicólogo"
+      ]
+    },
+    "fase_3_evolucion": {
+      "nombre": "Voz + ML avanzado + Adaptabilidad",
+      "incluye": [
+        "Respuesta por voz del sistema (Text-to-Speech)",
+        "Detección avanzada de patrones con ML",
+        "Sistema que se adapta al crecimiento del usuario",
+        "Métricas de tiempo en celular (si es posible técnicamente)"
+      ]
+    }
+  }
+}

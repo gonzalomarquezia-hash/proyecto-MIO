@@ -1,0 +1,214 @@
+import { useState, useRef, useEffect } from 'react'
+import { Sparkles, Send, Cloud, Megaphone, Shield, Zap, Ear } from 'lucide-react'
+import { sendMessageToGemini } from '../services/gemini'
+import { saveEmotionalRecord, getRecentRecordsForContext, getHabitos } from '../services/supabase'
+
+const voiceIcons = {
+    nino: '🌧️',
+    sargento: '📢',
+    adulto: '🛡️',
+    mixta: '🔄',
+    ninguna_dominante: '💭'
+}
+
+const voiceLabels = {
+    nino: 'Niño',
+    sargento: 'Sargento',
+    adulto: 'Adulto',
+    mixta: 'Mixta',
+    ninguna_dominante: ''
+}
+
+export default function ChatPage({ profile }) {
+    const [messages, setMessages] = useState([])
+    const [input, setInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const messagesEndRef = useRef(null)
+    const inputRef = useRef(null)
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
+
+    async function handleSend() {
+        const text = input.trim()
+        if (!text || isLoading) return
+
+        const userMsg = { role: 'user', content: text, timestamp: new Date() }
+        setMessages(prev => [...prev, userMsg])
+        setInput('')
+        setIsLoading(true)
+
+        try {
+            // Fetch recent records AND active habits for context
+            let recentRecords = []
+            let activeHabits = []
+            if (profile?.id) {
+                const [records, habits] = await Promise.all([
+                    getRecentRecordsForContext(profile.id, 10),
+                    getHabitos(profile.id)
+                ])
+                recentRecords = records
+                activeHabits = habits.filter(h => h.activo)
+            }
+
+            // Build conversation history (last 10 messages)
+            const history = messages.slice(-10).map(m => ({
+                role: m.role,
+                content: m.role === 'user' ? m.content : m.content
+            }))
+
+            // Call Gemini with habits context for dual-mode detection
+            const result = await sendMessageToGemini(text, history, recentRecords, activeHabits)
+
+            // Build AI message
+            const aiMsg = {
+                role: 'ai',
+                content: result.respuesta_conversacional,
+                analysis: result.analisis,
+                timestamp: new Date()
+            }
+            setMessages(prev => [...prev, aiMsg])
+
+            // Save to Supabase
+            if (profile?.id) {
+                await saveEmotionalRecord({
+                    user_id: profile.id,
+                    mensaje_raw: text,
+                    estado_emocional: result.analisis.estado_emocional || [],
+                    intensidad_emocional: result.analisis.intensidad_emocional || null,
+                    voz_identificada: result.analisis.voz_identificada || 'ninguna_dominante',
+                    pensamiento_automatico: result.analisis.pensamiento_automatico || null,
+                    distorsion_cognitiva: result.analisis.distorsion_cognitiva || [],
+                    contexto: result.analisis.contexto || null,
+                    pensamiento_alternativo: result.analisis.pensamiento_alternativo || null,
+                    respuesta_ia: result.respuesta_conversacional,
+                    tipo_registro: 'entrada_libre'
+                })
+            }
+        } catch (err) {
+            console.error('Chat error:', err)
+            setMessages(prev => [...prev, {
+                role: 'ai',
+                content: 'Perdón, tuve un problema técnico. ¿Podés repetirme lo que me decías?',
+                timestamp: new Date()
+            }])
+        }
+
+        setIsLoading(false)
+        inputRef.current?.focus()
+    }
+
+    function handleKeyDown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+        }
+    }
+
+    return (
+        <div className="chat-container">
+            <div className="chat-messages">
+                {messages.length === 0 ? (
+                    <div className="chat-welcome">
+                        <div className="chat-welcome-icon">
+                            <Sparkles size={32} color="white" />
+                        </div>
+                        <h2>Hola, {profile?.nombre || 'ahí'} 👋</h2>
+                        <p>
+                            Soy Conciencia, tu compañero de camino. Contame cómo estás,
+                            qué te pasa, o simplemente charlemos. Estoy acá para escucharte.
+                        </p>
+                    </div>
+                ) : (
+                    messages.map((msg, i) => (
+                        <div key={i} className={`message-row ${msg.role}`}>
+                            <div className={`message-avatar ${msg.role === 'user' ? 'user' : 'ai'}`}>
+                                {msg.role === 'user'
+                                    ? (profile?.nombre?.charAt(0)?.toUpperCase() || 'G')
+                                    : <Sparkles size={16} />
+                                }
+                            </div>
+                            <div>
+                                <div className="message-bubble">
+                                    {msg.content}
+                                </div>
+                                {msg.analysis && (
+                                    <div className="message-meta">
+                                        {msg.analysis.modo_respuesta && (
+                                            <span className={`mode-tag ${msg.analysis.modo_respuesta}`}>
+                                                {msg.analysis.modo_respuesta === 'accion' ? <><Zap size={12} /> Acción</> : <><Ear size={12} /> Escucha</>}
+                                                {msg.analysis.tarea_vinculada && ` → ${msg.analysis.tarea_vinculada}`}
+                                            </span>
+                                        )}
+                                        {msg.analysis.voz_identificada && msg.analysis.voz_identificada !== 'ninguna_dominante' && (
+                                            <span className={`voice-tag ${msg.analysis.voz_identificada}`}>
+                                                {voiceIcons[msg.analysis.voz_identificada]} {voiceLabels[msg.analysis.voz_identificada]}
+                                            </span>
+                                        )}
+                                        {msg.analysis.estado_emocional?.map((emo, j) => (
+                                            <span key={j} className="emotion-tag">{emo}</span>
+                                        ))}
+                                        {msg.analysis.intensidad_emocional > 0 && (
+                                            <span className="emotion-tag">
+                                                Intensidad: {msg.analysis.intensidad_emocional}/100
+                                            </span>
+                                        )}
+                                        {msg.analysis.tecnica_aplicada && msg.analysis.tecnica_aplicada !== 'ninguna' && (
+                                            <span className="technique-tag">
+                                                🧠 {msg.analysis.tecnica_aplicada.replace(/_/g, ' ')}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                                <span className="message-time">
+                                    {msg.timestamp?.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                        </div>
+                    ))
+                )}
+
+                {isLoading && (
+                    <div className="message-row ai">
+                        <div className="message-avatar ai">
+                            <Sparkles size={16} />
+                        </div>
+                        <div className="message-bubble">
+                            <div className="typing-indicator">
+                                <div className="typing-dot"></div>
+                                <div className="typing-dot"></div>
+                                <div className="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div ref={messagesEndRef} />
+            </div>
+
+            <div className="chat-input-area">
+                <div className="chat-input-wrapper">
+                    <textarea
+                        ref={inputRef}
+                        className="chat-input"
+                        placeholder="Contame, ¿cómo estás?"
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        rows={1}
+                        disabled={isLoading}
+                    />
+                    <button
+                        className="chat-send-btn"
+                        onClick={handleSend}
+                        disabled={!input.trim() || isLoading}
+                        title="Enviar"
+                    >
+                        <Send size={18} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}

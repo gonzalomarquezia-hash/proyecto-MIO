@@ -1,0 +1,65 @@
+======================================================================
+TEST 1: CON h├íbito "Hacer ejercicio" registrado ΓåÆ MODO ACCION
+======================================================================
+
+Modo: accion
+Tarea vinculada: Hacer ejercicio
+T├⌐cnica: micro_compromiso
+Voz: nino
+Emociones: desmotivado, ap├ítico, procrastinando
+
+RESPUESTA:
+Entiendo perfecto esa fiaca, Gonza. La voz del 'pobrecito yo' es re seductora y el sill├│n tira mucho. Pero par├í un segundo. ┬┐Qui├⌐n eligi├│ hacer ejercicio para sentirse mejor? Fuiste vos, tu versi├│n adulta. Esa voz que te habla ahora es la del Ni├▒o Peque├▒o, que busca la comodidad inmediata. No te pido la rutina ol├¡mpica, eh. ┬┐Qu├⌐ te parece si hacemos un trato? Solo levantate y ponete la ropa para entrenar. Nada m├ís. Despu├⌐s de eso, si quer├⌐s, te volv├⌐s a sentar. ┬┐Te va? Es un solo pasito.
+
+======================================================================
+TEST 2: SIN h├íbitos registrados ΓåÆ MODO ESCUCHA PROFUNDA
+======================================================================
+
+Modo: escucha_profunda
+Tarea vinculada: null
+T├⌐cnica: cuestionamiento_socratico
+Voz: nino
+Emociones: Apat├¡a, Conflicto interno, Procrastinaci├│n
+
+RESPUESTA:
+Te escucho, Gonza. Es totalmente normal sentir esa fiaca, y esa vocecita del 'pobrecito' sabe c├│mo hacerse escuchar, ┬┐no? La reconoc├⌐s bien, es el Ni├▒o buscando el alivio inmediato. Ahora, frenemos un toque ah├¡. Me dec├¡s que una parte tuya quiere hacer ejercicio. ┬┐Qu├⌐ busca esa parte para vos? ┬┐Qu├⌐ cre├⌐s que pasar├¡a si la escucharas solo a ella?
+
+======================================================================
+TEST 3: Mensaje de desesperanza ΓåÆ T├ëCNICA DE GRATITUD
+======================================================================
+
+Modo: escucha_profunda
+T├⌐cnica: [
+  'cuestionamiento_socratico',
+  'gratitud_activa',
+  'busqueda_evidencia'
+]
+Voz: mixta
+Emociones: desesperanza, frustracion, estancamiento
+
+RESPUESTA:
+Uf, te escucho, Gonza. Suena a que ten├⌐s un nubarr├│n negro encima ahora mismo y es agotador sentir que est├ís empujando una pared. Respiremos un segundo. Ese "todo me sale mal"... ┬┐es realmente un *todo*? ┬┐No hay ni una sola cosita, por m├ís chiquita que sea, que hoy no haya sido un desastre? A veces la cabeza nos mete en ese t├║nel donde solo vemos lo oscuro. S├⌐ que ahora parece imposible, pero si te forzaras a nombrar una sola cosa, una pavada nom├ís, por la que podr├¡as estar agradecido en este preciso instante, ┬┐qu├⌐ ser├¡a?
+
+======================================================================
+CREANDO H├üBITO "Hacer ejercicio" EN SUPABASE...
+======================================================================
+User ID: d96f427b-1a2f-418a-ab91-d96672e94afe
+H├íbito creado: [
+  {
+    "id": "b9786e38-bb76-4098-9026-ab7b7005a8f9",
+    "user_id": "d96f427b-1a2f-418a-ab91-d96672e94afe",
+    "meta_id": null,
+    "nombre": "Hacer ejercicio",
+    "frecuencia": "diario",
+    "hora_recordatorio": "18:00:00",
+    "mensaje_recordatorio": "Hora de entrenar, dale que vos pod├⌐s",
+    "mensaje_nocturno": null,
+    "hora_mensaje_nocturno": null,
+    "activo": true,
+    "racha_actual": 3,
+    "racha_maxima": 7,
+    "created_at": "2026-02-10T23:55:29.144534+00:00"
+  }
+]
+
+Γ£à TEST COMPLETO
