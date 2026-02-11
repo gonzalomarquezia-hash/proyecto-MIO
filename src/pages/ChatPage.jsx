@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
-import { Sparkles, Send, Cloud, Megaphone, Shield, Zap, Ear } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { Sparkles, Send, Zap, Ear, RotateCcw } from 'lucide-react'
 import { sendMessageToGemini } from '../services/gemini'
 import { saveEmotionalRecord, getRecentRecordsForContext, getHabitos } from '../services/supabase'
+
+const STORAGE_KEY = 'conciencia_chat_messages'
 
 const voiceIcons = {
     nino: '🌧️',
@@ -19,15 +21,55 @@ const voiceLabels = {
     ninguna_dominante: ''
 }
 
+// Load messages from localStorage
+function loadMessages() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        if (!saved) return []
+        const parsed = JSON.parse(saved)
+        // Restore Date objects from ISO strings
+        return parsed.map(msg => ({
+            ...msg,
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date()
+        }))
+    } catch {
+        return []
+    }
+}
+
+// Save messages to localStorage
+function persistMessages(messages) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+    } catch (e) {
+        console.warn('Could not save chat to localStorage:', e)
+    }
+}
+
 export default function ChatPage({ profile }) {
-    const [messages, setMessages] = useState([])
+    const [messages, setMessages] = useState(() => loadMessages())
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
 
+    // Persist messages every time they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            persistMessages(messages)
+        }
+    }, [messages])
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
+
+    const handleNewConversation = useCallback(() => {
+        if (messages.length === 0) return
+        if (window.confirm('¿Querés iniciar una conversación nueva? La anterior se va a borrar.')) {
+            setMessages([])
+            localStorage.removeItem(STORAGE_KEY)
+        }
     }, [messages])
 
     async function handleSend() {
@@ -55,7 +97,7 @@ export default function ChatPage({ profile }) {
             // Build conversation history (last 10 messages)
             const history = messages.slice(-10).map(m => ({
                 role: m.role,
-                content: m.role === 'user' ? m.content : m.content
+                content: m.content
             }))
 
             // Call Gemini with habits context for dual-mode detection
@@ -108,6 +150,21 @@ export default function ChatPage({ profile }) {
 
     return (
         <div className="chat-container">
+            {/* Chat header with new conversation button */}
+            {messages.length > 0 && (
+                <div className="chat-header">
+                    <span className="chat-header-count">{messages.length} mensajes</span>
+                    <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={handleNewConversation}
+                        title="Nueva conversación"
+                    >
+                        <RotateCcw size={14} />
+                        Nueva conversación
+                    </button>
+                </div>
+            )}
+
             <div className="chat-messages">
                 {messages.length === 0 ? (
                     <div className="chat-welcome">
