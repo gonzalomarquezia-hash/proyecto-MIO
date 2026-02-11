@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Menu } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import ChatPage from './pages/ChatPage'
 import MetasPage from './pages/MetasPage'
@@ -29,6 +30,15 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-layout">
+        {/* Mobile hamburger button */}
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Abrir menú"
+        >
+          <Menu size={22} />
+        </button>
+
         <Sidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}

@@ -1413,7 +1413,108 @@ body {
   color: var(--danger);
 }
 
+/* ============ MOBILE HAMBURGER BUTTON ============ */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.mobile-menu-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--secondary);
+}
+
+/* ============ RESPONSIVE — MOBILE ============ */
 @media (max-width: 768px) {
+
+  /* Show hamburger button */
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  /* Sidebar: hidden off-screen by default, slides in as overlay */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    transform: translateX(-100%);
+    z-index: 160;
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Don't allow collapsed on mobile */
+  .sidebar.collapsed {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+  }
+
+  .sidebar.collapsed .sidebar-logo h1,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .sidebar-footer-text {
+    display: block;
+  }
+
+  /* Hide the desktop collapse toggle on mobile */
+  .sidebar-toggle {
+    display: none;
+  }
+
+  /* Main content takes full width */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Page container padding */
+  .page-container {
+    padding: 60px 16px 20px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  /* Chat adjustments */
+  .chat-container {
+    padding-top: 54px;
+  }
+
+  .chat-header {
+    top: 54px;
+  }
+
+  .chat-welcome h2 {
+    font-size: 20px;
+  }
+
+  .chat-input-wrapper {
+    margin: 0 8px 8px;
+  }
+
+  /* Registros responsive */
   .registros-filters {
     flex-direction: column;
     align-items: stretch;
@@ -1426,5 +1527,25 @@ body {
   .registro-header-left {
     flex-wrap: nowrap;
     overflow-x: auto;
+  }
+
+  .registro-header {
+    flex-wrap: wrap;
+  }
+
+  /* Cards and forms */
+  .card {
+    padding: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .goal-card {
+    padding: 16px;
+  }
+
+  /* Modal */
+  .modal-content {
+    margin: 16px;
+    max-height: 90vh;
   }
 }
