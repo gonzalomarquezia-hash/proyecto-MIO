@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Sparkles, Send, RotateCcw } from 'lucide-react'
 import { sendMessageToGemini } from '../services/gemini'
-import { saveEmotionalRecord, getRecentRecordsForContext, getHabitos } from '../services/supabase'
+import { saveEmotionalRecord, getHabitos } from '../services/supabase'
 
 const STORAGE_KEY = 'conciencia_chat_messages'
 
@@ -82,15 +82,10 @@ export default function ChatPage({ profile }) {
         setIsLoading(true)
 
         try {
-            // Fetch recent records AND active habits for context
-            let recentRecords = []
+            // Fetch active habits for dual-mode detection
             let activeHabits = []
             if (profile?.id) {
-                const [records, habits] = await Promise.all([
-                    getRecentRecordsForContext(profile.id, 10),
-                    getHabitos(profile.id)
-                ])
-                recentRecords = records
+                const habits = await getHabitos(profile.id)
                 activeHabits = habits.filter(h => h.activo)
             }
 
@@ -100,8 +95,8 @@ export default function ChatPage({ profile }) {
                 content: m.content
             }))
 
-            // Call Gemini with habits context for dual-mode detection
-            const result = await sendMessageToGemini(text, history, recentRecords, activeHabits)
+            // Call AI with userId for server-side vector search
+            const result = await sendMessageToGemini(text, history, [], activeHabits, profile?.id)
 
             // Build AI message
             const aiMsg = {
@@ -112,7 +107,7 @@ export default function ChatPage({ profile }) {
             }
             setMessages(prev => [...prev, aiMsg])
 
-            // Save to Supabase
+            // Save to Supabase (now includes embedding for vector search)
             if (profile?.id) {
                 await saveEmotionalRecord({
                     user_id: profile.id,
@@ -125,7 +120,8 @@ export default function ChatPage({ profile }) {
                     contexto: result.analisis.contexto || null,
                     pensamiento_alternativo: result.analisis.pensamiento_alternativo || null,
                     respuesta_ia: result.respuesta_conversacional,
-                    tipo_registro: 'entrada_libre'
+                    tipo_registro: 'entrada_libre',
+                    embedding: result.embedding || null
                 })
             }
         } catch (err) {

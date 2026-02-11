@@ -1,7 +1,8 @@
 // AI Service — calls the serverless function at /api/chat
 // The API key stays server-side, never exposed to the browser
+// Now also sends userId for vector search on the server
 
-export async function sendMessageToGemini(userMessage, conversationHistory = [], recentRecords = [], activeHabits = []) {
+export async function sendMessageToGemini(userMessage, conversationHistory = [], recentRecords = [], activeHabits = [], userId = null) {
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -12,8 +13,8 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
                     role: m.role === 'ai' ? 'assistant' : m.role,
                     content: m.content
                 })),
-                recentRecords,
-                activeHabits
+                activeHabits,
+                userId
             })
         })
 
@@ -39,7 +40,8 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
                 modo_respuesta: 'escucha_profunda',
                 tarea_vinculada: null,
                 tecnica_aplicada: 'ninguna'
-            }
+            },
+            embedding: null
         }
     }
 }
