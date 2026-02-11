@@ -472,14 +472,21 @@ body {
   letter-spacing: 0.5px;
 }
 
-.mode-tag.accion {
+.mode-tag.accion,
+.mode-tag.motivador {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
 }
 
-.mode-tag.escucha_profunda {
+.mode-tag.escucha_profunda,
+.mode-tag.escucha_pasiva {
   background: rgba(96, 165, 250, 0.15);
   color: #60a5fa;
+}
+
+.mode-tag.terapeuta {
+  background: rgba(167, 139, 250, 0.15);
+  color: var(--secondary-light);
 }
 
 .technique-tag {
@@ -602,6 +609,40 @@ body {
 .chat-send-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Stop button — replaces send while AI is generating */
+.chat-stop-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, var(--danger), #b91c1c);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+  animation: stopPulse 1.5s ease-in-out infinite;
+}
+
+.chat-stop-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+@keyframes stopPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* ============ CARDS ============ */

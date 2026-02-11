@@ -1,24 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Sparkles, Send, RotateCcw } from 'lucide-react'
+import { Sparkles, Send, RotateCcw, Square } from 'lucide-react'
 import { sendMessageToGemini } from '../services/gemini'
 import { saveEmotionalRecord, getHabitos } from '../services/supabase'
 
 const STORAGE_KEY = 'conciencia_chat_messages'
 
-const voiceIcons = {
-    nino: '🌧️',
-    sargento: '📢',
-    adulto: '🛡️',
-    mixta: '🔄',
-    ninguna_dominante: '💭'
-}
-
-const voiceLabels = {
-    nino: 'Niño',
-    sargento: 'Sargento',
-    adulto: 'Adulto',
-    mixta: 'Mixta',
-    ninguna_dominante: ''
+// Detect if device has a touchscreen (mobile)
+function isMobileDevice() {
+    return window.matchMedia('(pointer: coarse)').matches
 }
 
 // Load messages from localStorage
@@ -27,7 +16,6 @@ function loadMessages() {
         const saved = localStorage.getItem(STORAGE_KEY)
         if (!saved) return []
         const parsed = JSON.parse(saved)
-        // Restore Date objects from ISO strings
         return parsed.map(msg => ({
             ...msg,
             timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date()
@@ -37,7 +25,6 @@ function loadMessages() {
     }
 }
 
-// Save messages to localStorage
 function persistMessages(messages) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
@@ -52,8 +39,8 @@ export default function ChatPage({ profile }) {
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
+    const abortControllerRef = useRef(null)
 
-    // Persist messages every time they change
     useEffect(() => {
         if (messages.length > 0) {
             persistMessages(messages)
@@ -72,6 +59,15 @@ export default function ChatPage({ profile }) {
         }
     }, [messages])
 
+    // Stop the AI response generation
+    function handleStop() {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+            abortControllerRef.current = null
+        }
+        setIsLoading(false)
+    }
+
     async function handleSend() {
         const text = input.trim()
         if (!text || isLoading) return
@@ -81,24 +77,27 @@ export default function ChatPage({ profile }) {
         setInput('')
         setIsLoading(true)
 
+        // Create AbortController for this request
+        const controller = new AbortController()
+        abortControllerRef.current = controller
+
         try {
-            // Fetch active habits for dual-mode detection
             let activeHabits = []
             if (profile?.id) {
                 const habits = await getHabitos(profile.id)
                 activeHabits = habits.filter(h => h.activo)
             }
 
-            // Build conversation history (last 10 messages)
             const history = messages.slice(-10).map(m => ({
                 role: m.role,
                 content: m.content
             }))
 
-            // Call AI with userId for server-side vector search
-            const result = await sendMessageToGemini(text, history, [], activeHabits, profile?.id)
+            const result = await sendMessageToGemini(text, history, [], activeHabits, profile?.id, controller.signal)
 
-            // Build AI message
+            // If aborted, don't process response
+            if (controller.signal.aborted) return
+
             const aiMsg = {
                 role: 'ai',
                 content: result.respuesta_conversacional,
@@ -107,46 +106,63 @@ export default function ChatPage({ profile }) {
             }
             setMessages(prev => [...prev, aiMsg])
 
-            // Save to Supabase (now includes embedding for vector search)
+            // Save to Supabase with new fields
             if (profile?.id) {
                 await saveEmotionalRecord({
                     user_id: profile.id,
                     mensaje_raw: text,
-                    estado_emocional: result.analisis.estado_emocional || [],
-                    intensidad_emocional: result.analisis.intensidad_emocional || null,
-                    voz_identificada: result.analisis.voz_identificada || 'ninguna_dominante',
-                    pensamiento_automatico: result.analisis.pensamiento_automatico || null,
-                    distorsion_cognitiva: result.analisis.distorsion_cognitiva || [],
-                    contexto: result.analisis.contexto || null,
-                    pensamiento_alternativo: result.analisis.pensamiento_alternativo || null,
+                    estado_emocional: result.analisis?.estado_emocional || [],
+                    intensidad_emocional: result.analisis?.intensidad_emocional || null,
+                    voz_identificada: result.analisis?.voz_identificada || 'ninguna_dominante',
+                    pensamiento_automatico: result.analisis?.pensamiento_automatico || null,
+                    distorsion_cognitiva: result.analisis?.distorsion_cognitiva || [],
+                    contexto: result.analisis?.contexto || null,
+                    pensamiento_alternativo: result.analisis?.pensamiento_alternativo || null,
                     respuesta_ia: result.respuesta_conversacional,
                     tipo_registro: 'entrada_libre',
-                    embedding: result.embedding || null
+                    embedding: result.embedding || null,
+                    estado_animo: result.analisis?.estado_animo || null,
+                    sintomas_fisicos: result.analisis?.sintomas_fisicos || []
                 })
             }
         } catch (err) {
-            console.error('Chat error:', err)
-            setMessages(prev => [...prev, {
-                role: 'ai',
-                content: 'Perdón, tuve un problema técnico. ¿Podés repetirme lo que me decías?',
-                timestamp: new Date()
-            }])
+            if (err.name === 'AbortError') {
+                setMessages(prev => [...prev, {
+                    role: 'ai',
+                    content: '⏹️ Respuesta cancelada.',
+                    timestamp: new Date()
+                }])
+            } else {
+                console.error('Chat error:', err)
+                setMessages(prev => [...prev, {
+                    role: 'ai',
+                    content: 'Perdón, tuve un problema técnico. ¿Podés repetirme lo que me decías?',
+                    timestamp: new Date()
+                }])
+            }
         }
 
+        abortControllerRef.current = null
         setIsLoading(false)
         inputRef.current?.focus()
     }
 
     function handleKeyDown(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault()
-            handleSend()
+        if (e.key === 'Enter') {
+            // On mobile: Enter always makes a new line
+            if (isMobileDevice()) {
+                return // let the default behavior (new line) happen
+            }
+            // On desktop: Enter sends, Shift+Enter makes new line
+            if (!e.shiftKey) {
+                e.preventDefault()
+                handleSend()
+            }
         }
     }
 
     return (
         <div className="chat-container">
-            {/* Chat header with new conversation button */}
             {messages.length > 0 && (
                 <div className="chat-header">
                     <span className="chat-header-count">{messages.length} mensajes</span>
@@ -225,14 +241,24 @@ export default function ChatPage({ profile }) {
                         rows={1}
                         disabled={isLoading}
                     />
-                    <button
-                        className="chat-send-btn"
-                        onClick={handleSend}
-                        disabled={!input.trim() || isLoading}
-                        title="Enviar"
-                    >
-                        <Send size={18} />
-                    </button>
+                    {isLoading ? (
+                        <button
+                            className="chat-stop-btn"
+                            onClick={handleStop}
+                            title="Detener respuesta"
+                        >
+                            <Square size={16} />
+                        </button>
+                    ) : (
+                        <button
+                            className="chat-send-btn"
+                            onClick={handleSend}
+                            disabled={!input.trim()}
+                            title="Enviar"
+                        >
+                            <Send size={18} />
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
