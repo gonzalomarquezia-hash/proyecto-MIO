@@ -1,7 +1,7 @@
 // AI Service — calls the serverless function at /api/chat
-// The API key stays server-side, never exposed to the browser
+// Supports multi-agent modes: escucha, reflexion, accion
 
-export async function sendMessageToGemini(userMessage, conversationHistory = [], recentRecords = [], activeHabits = [], userId = null, signal = null) {
+export async function sendMessageToGemini(userMessage, conversationHistory = [], recentRecords = [], activeHabits = [], userId = null, signal = null, modo = 'escucha', conversacionId = null) {
     try {
         const fetchOptions = {
             method: 'POST',
@@ -13,11 +13,12 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
                     content: m.content
                 })),
                 activeHabits,
-                userId
+                userId,
+                modo,
+                conversacionId
             })
         }
 
-        // Add abort signal if provided
         if (signal) fetchOptions.signal = signal
 
         const response = await fetch('/api/chat', fetchOptions)
@@ -30,7 +31,6 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
 
         return await response.json()
     } catch (error) {
-        // Re-throw AbortError so ChatPage can handle it
         if (error.name === 'AbortError') throw error
 
         console.error('Chat service error:', error)
@@ -44,11 +44,13 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
                 distorsion_cognitiva: [],
                 contexto: 'Error de conexión',
                 pensamiento_alternativo: null,
-                modo_respuesta: 'escucha_pasiva',
+                modo_respuesta: 'escucha',
                 tarea_vinculada: null,
                 tecnica_aplicada: 'ninguna',
                 estado_animo: null,
-                sintomas_fisicos: []
+                sintomas_fisicos: [],
+                logro_detectado: null,
+                recomendacion: null
             },
             embedding: null
         }

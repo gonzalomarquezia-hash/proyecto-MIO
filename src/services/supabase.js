@@ -185,3 +185,66 @@ export async function getLogros(userId, limit = 20) {
   if (error) console.error('Error fetching logros:', error)
   return data || []
 }
+
+// ---- CONVERSACIONES ----
+export async function createConversacion(conv) {
+  const { data, error } = await supabase
+    .from('conversaciones')
+    .insert(conv)
+    .select()
+    .single()
+  if (error) console.error('Error creating conversacion:', error)
+  return data
+}
+
+export async function getConversaciones(userId, limit = 20) {
+  const { data, error } = await supabase
+    .from('conversaciones')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(limit)
+  if (error) console.error('Error fetching conversaciones:', error)
+  // Add message count manually
+  const convs = data || []
+  for (const c of convs) {
+    const { count } = await supabase
+      .from('mensajes_chat')
+      .select('*', { count: 'exact', head: true })
+      .eq('conversacion_id', c.id)
+    c.mensaje_count = count || 0
+  }
+  return convs
+}
+
+export async function updateConversacion(id, updates) {
+  const { data, error } = await supabase
+    .from('conversaciones')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) console.error('Error updating conversacion:', error)
+  return data
+}
+
+// ---- MENSAJES DE CHAT ----
+export async function saveChatMessage(msg) {
+  const { data, error } = await supabase
+    .from('mensajes_chat')
+    .insert(msg)
+    .select()
+    .single()
+  if (error) console.error('Error saving chat message:', error)
+  return data
+}
+
+export async function getChatMessages(conversacionId) {
+  const { data, error } = await supabase
+    .from('mensajes_chat')
+    .select('*')
+    .eq('conversacion_id', conversacionId)
+    .order('created_at', { ascending: true })
+  if (error) console.error('Error fetching chat messages:', error)
+  return data || []
+}

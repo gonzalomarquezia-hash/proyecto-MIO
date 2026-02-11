@@ -4,9 +4,10 @@
 -- ============================================
 
 -- 1. Tabla de logros
+-- CORREGIDO: Referencia a 'perfil_usuario' en lugar de 'perfiles'
 CREATE TABLE IF NOT EXISTS logros (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id uuid REFERENCES perfiles(id),
+  user_id uuid REFERENCES perfil_usuario(id),
   descripcion text NOT NULL,
   categoria text DEFAULT 'general',
   fuente text DEFAULT 'implicito',

@@ -1589,4 +1589,465 @@ body {
     margin: 16px;
     max-height: 90vh;
   }
+
+  /* Mode selector responsive */
+  .mode-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .chat-top-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chat-history-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .mode-selector-compact {
+    flex-wrap: wrap;
+  }
+}
+
+/* ============================
+   MULTI-AGENT: Mode Selector
+   ============================ */
+.mode-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  flex: 1;
+  min-height: 60vh;
+}
+
+.mode-selector-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.mode-selector-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.mode-selector-header p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.mode-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.mode-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--mode-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mode-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--mode-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 16px color-mix(in srgb, var(--mode-color) 20%, transparent);
+}
+
+.mode-card:hover::before {
+  opacity: 1;
+}
+
+.mode-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--mode-color) 15%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mode-color);
+}
+
+.mode-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mode-card-emoji {
+  font-size: 28px;
+  display: none;
+}
+
+.mode-card-content h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mode-card-subtitle {
+  font-size: 13px;
+  color: var(--mode-color);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mode-card-content p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* Compact mode pills (in chat header) */
+.mode-selector-compact {
+  display: flex;
+  gap: 6px;
+}
+
+.mode-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-pill:hover {
+  border-color: var(--mode-color);
+  color: var(--mode-color);
+  background: color-mix(in srgb, var(--mode-color) 10%, var(--bg-card));
+}
+
+/* ============================
+   MULTI-AGENT: Chat Top Bar
+   ============================ */
+.chat-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+.chat-top-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.chat-mode-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mode-color) 12%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--mode-color) 30%, transparent);
+}
+
+.chat-mode-emoji {
+  font-size: 14px;
+}
+
+.chat-mode-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mode-color);
+}
+
+.chat-msg-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chat-welcome-hint {
+  display: block;
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* ============================
+   MULTI-AGENT: Recommendation Card
+   ============================ */
+.recommendation-card {
+  margin: 8px 0 8px 52px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--mode-color) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--mode-color) 25%, transparent);
+  border-radius: var(--radius-md);
+  max-width: 400px;
+  animation: slideIn 0.3s ease;
+}
+
+.recommendation-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.recommendation-icon {
+  font-size: 16px;
+}
+
+.recommendation-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mode-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recommendation-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.recommendation-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--mode-color);
+  background: color-mix(in srgb, var(--mode-color) 15%, transparent);
+  color: var(--mode-color);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.recommendation-btn:hover {
+  background: color-mix(in srgb, var(--mode-color) 25%, transparent);
+  transform: translateX(2px);
+}
+
+/* ============================
+   MULTI-AGENT: Chat History Panel
+   ============================ */
+.chat-history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+.chat-history-panel {
+  width: 360px;
+  max-width: 90vw;
+  background: var(--bg-main);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  animation: slideFromRight 0.3s ease;
+}
+
+@keyframes slideFromRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.chat-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-history-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chat-history-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.chat-history-close:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.chat-history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.chat-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.chat-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.chat-history-item:hover {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.chat-history-item-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--mode-color) 12%, transparent);
+}
+
+.chat-history-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-history-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-history-item-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-history-item-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.chat-history-item-badge {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
