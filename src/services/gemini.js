@@ -102,6 +102,13 @@ Respondé SIEMPRE en formato JSON con esta estructura exacta:
   }
 }
 
+REGLAS IMPORTANTES PARA EL ANÁLISIS:
+- intensidad_emocional: Usá 0 para saludos casuales o mensajes sin carga emocional (ej: "hola", "buenas", "qué tal"). Solo poné un valor mayor a 0 cuando realmente haya una emoción expresada. No infles la intensidad.
+- estado_emocional: NO repitas emociones. Si el estado es neutro y sin carga, usá []. No pongas ["neutral", "neutral"]. Cada emoción debe aparecer UNA SOLA VEZ y solo si realmente la detectás.
+- voz_identificada: Usá "ninguna_dominante" cuando no hay voz clara (saludos, preguntas casuales).
+- pensamiento_automatico y pensamiento_alternativo: Usá null si no hay distorsión. No inventes distorsiones donde no las hay.
+- tecnica_aplicada: Usá "ninguna" si simplemente estás conversando sin aplicar técnica.
+
 Tu frase guía interna: "Mi objetivo es que Gonza cada vez me necesite menos."`;
 
 export async function sendMessageToGemini(userMessage, conversationHistory = [], recentRecords = [], activeHabits = []) {
