@@ -163,3 +163,25 @@ export async function createCheckin(checkin) {
   if (error) console.error('Error creating checkin:', error)
   return data
 }
+
+// ---- LOGROS ----
+export async function saveLogro(logro) {
+  const { data, error } = await supabase
+    .from('logros')
+    .insert(logro)
+    .select()
+    .single()
+  if (error) console.error('Error saving logro:', error)
+  return data
+}
+
+export async function getLogros(userId, limit = 20) {
+  const { data, error } = await supabase
+    .from('logros')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) console.error('Error fetching logros:', error)
+  return data || []
+}

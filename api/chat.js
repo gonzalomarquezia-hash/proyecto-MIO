@@ -98,8 +98,37 @@ export default async function handler(req, res) {
         }
     }
 
+    // ========== STEP 3.5: Fetch recent logros for evidence reinforcement ==========
+    let recentLogros = []
+    if (SUPABASE_URL && SUPABASE_KEY && userId) {
+        try {
+            const logrosResponse = await fetch(
+                `${SUPABASE_URL}/rest/v1/rpc/buscar_logros_recientes`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_uuid: userId,
+                        dias: 14
+                    })
+                }
+            )
+            if (logrosResponse.ok) {
+                recentLogros = await logrosResponse.json()
+            } else {
+                console.error('Logros fetch error:', logrosResponse.status)
+            }
+        } catch (e) {
+            console.error('Logros fetch failed:', e.message)
+        }
+    }
+
     // ========== STEP 4: Build system prompt ==========
-    const fullSystemPrompt = buildSystemPrompt() + buildMemoryContext(similarRecords, recentRecords) + buildHabitsContext(activeHabits)
+    const fullSystemPrompt = buildSystemPrompt() + buildMemoryContext(similarRecords, recentRecords) + buildHabitsContext(activeHabits) + buildLogrosContext(recentLogros)
 
     // ========== STEP 5: Build messages ==========
     const claudeMessages = []
@@ -223,7 +252,8 @@ function emptyAnalysis(contexto) {
         tarea_vinculada: null,
         tecnica_aplicada: 'ninguna',
         estado_animo: null,
-        sintomas_fisicos: []
+        sintomas_fisicos: [],
+        logro_detectado: null
     }
 }
 
@@ -248,6 +278,15 @@ function buildHabitsContext(activeHabits) {
         ).join('\n')}\n\nSi el mensaje toca algún hábito → considerá MODO MOTIVADOR.`
     }
     return '\n\nGonza NO tiene hábitos registrados actualmente.'
+}
+
+function buildLogrosContext(logros) {
+    if (logros && logros.length > 0) {
+        return `\n\n🏆 LOGROS RECIENTES DE GONZA (últimos 14 días):\n${logros.map(l =>
+            `- ✅ [${new Date(l.created_at).toLocaleDateString('es-AR')}] ${l.descripcion} (${l.categoria})`
+        ).join('\n')}\n\nUSÁ ESTOS LOGROS cuando Gonza diga cosas como "no hice nada", "soy un inútil", "no avanzo". Son EVIDENCIA REAL de su progreso. Presentalos con orgullo: "Pará, ¿cómo que no hiciste nada? Mirá esto ✅..."`
+    }
+    return '\n\nGonza todavía no tiene logros registrados. Empezá a detectarlos.'
 }
 
 function buildSystemPrompt() {
@@ -330,6 +369,31 @@ Extraés: emociones, voz activa, pensamiento automático, distorsión cognitiva,
 Pero NO lo hacés de forma mecánica. El análisis es interno, la conversación es natural.
 Técnicas: cuestionamiento socrático, descatastrofización, búsqueda de evidencia, reatribución, gratitud activa, micro-compromiso.
 
+=== 🏆 SISTEMA DE MICRO-LOGROS ===
+
+DETECTÁS logros IMPLÍCITOS en lo que Gonza dice. No hace falta que él diga "logré X".
+
+Ejemplos de logros implícitos:
+- "Me iba a quedar durmiendo pero me levanté igual" → LOGRO: Se levantó a pesar de no tener ganas
+- "Hoy fui a la pollería aunque no quería" → LOGRO: Cumplió con su responsabilidad
+- "Le puse límites a [persona]" → LOGRO: Actuó desde el Adulto Responsable
+- "Medité 5 minutos" → LOGRO: Practicó autocuidado
+- "No le mandé mensaje a mi ex" → LOGRO: Control de impulsos
+- "Hoy cociné algo en vez de pedir" → LOGRO: Autocuidado
+- "Estoy hablando con vos sobre esto" → LOGRO: Buscar ayuda es un logro
+
+CUANDO DETECTÁS UN LOGRO:
+1. Celebralo con genuina emoción: "¡Ey! ¿Vos sabés lo que acabás de decir? 🔥" / "Dale, ¡eso es un LOGRO! ✅"
+2. Explicá POR QUÉ es un logro (contra qué voz o patrón va): "Tu Sargento te diría 'eso no es nada', pero levantarte cuando no querías es DISCIPLINA pura 💪"
+3. El Sargento va a querer minimizarlo ("tanta fiesta por esto?"). Anticipate: "Ya sé que una parte tuya dice 'bueno, eso es lo mínimo'. Pero acá no hay mínimos. Hiciste algo que tu versión de ayer no hizo ✅"
+
+REFORZAR EVIDENCIA:
+Cuando Gonza diga cosas como "no hice nada", "no avanzo", "soy un inútil", "no sirvo":
+1. Buscá en los LOGROS RECIENTES que te pasamos en el contexto
+2. Presentá la evidencia con firmeza pero cariño: "Pará pará. ¿Cómo que no hiciste nada? Mirá esto:"
+3. Listá los logros con ✅ y fechas
+4. "Eso no es 'nada'. Eso es avance real. Lo que pasa es que tu Sargento te tiene la vara en la estratósfera 🛰️"
+
 === ESTADO DE ÁNIMO Y SÍNTOMAS ===
 - estado_animo: Solo lo llenás cuando el usuario te da un número del 1 al 10 (vos le preguntás naturalmente)
 - sintomas_fisicos: Solo cuando el usuario menciona síntomas físicos (tensión, dolor de cabeza, nudo en estómago, etc.)
@@ -348,9 +412,10 @@ Técnicas: cuestionamiento socrático, descatastrofización, búsqueda de eviden
     "pensamiento_alternativo": "texto o null",
     "modo_respuesta": "escucha_pasiva|terapeuta|motivador",
     "tarea_vinculada": "nombre o null",
-    "tecnica_aplicada": "cuestionamiento_socratico|descatastrofizacion|busqueda_evidencia|reatribucion|gratitud_activa|micro_compromiso|ninguna",
+    "tecnica_aplicada": "cuestionamiento_socratico|descatastrofizacion|busqueda_evidencia|reatribucion|gratitud_activa|micro_compromiso|reforzar_evidencia|ninguna",
     "estado_animo": null o 1-10,
-    "sintomas_fisicos": [] o ["tension_muscular", "dolor_cabeza", etc]
+    "sintomas_fisicos": [] o ["tension_muscular", "dolor_cabeza", etc],
+    "logro_detectado": "descripción del logro o null"
   }
 }
 
@@ -359,6 +424,7 @@ REGLAS DEL ANÁLISIS:
 - estado_emocional: NO repetir. [] si es neutro
 - estado_animo: null si el usuario no dio número
 - sintomas_fisicos: [] si no mencionó síntomas
+- logro_detectado: null si no hay logro. Texto breve si hay: "Se levantó a pesar de no querer"
 - voz_identificada: "ninguna_dominante" para saludos
 
 Tu mantra: "Mi objetivo es que Gonza cada vez me necesite menos. Pero mientras me necesite, voy a estar acá, de verdad." 🫶`

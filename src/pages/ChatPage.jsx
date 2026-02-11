@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Sparkles, Send, RotateCcw, Square } from 'lucide-react'
 import { sendMessageToGemini } from '../services/gemini'
-import { saveEmotionalRecord, getHabitos } from '../services/supabase'
+import { saveEmotionalRecord, getHabitos, saveLogro } from '../services/supabase'
+import Confetti from '../components/Confetti'
 
 const STORAGE_KEY = 'conciencia_chat_messages'
 
@@ -33,10 +34,24 @@ function persistMessages(messages) {
     }
 }
 
+// Detect category for a logro based on context
+function detectLogroCategoria(analisis) {
+    const ctx = (analisis?.contexto || '').toLowerCase()
+    const logro = (analisis?.logro_detectado || '').toLowerCase()
+    const combined = ctx + ' ' + logro
+    if (combined.includes('medita') || combined.includes('autocuidado') || combined.includes('levant')) return 'autocuidado'
+    if (combined.includes('poller') || combined.includes('trabajo') || combined.includes('tarea') || combined.includes('estudi')) return 'productividad'
+    if (combined.includes('límite') || combined.includes('relaci') || combined.includes('social')) return 'social'
+    if (combined.includes('ejerci') || combined.includes('físic') || combined.includes('camin')) return 'fisico'
+    if (combined.includes('emoci') || combined.includes('impulso') || combined.includes('control')) return 'emocional'
+    return 'general'
+}
+
 export default function ChatPage({ profile }) {
     const [messages, setMessages] = useState(() => loadMessages())
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [showConfetti, setShowConfetti] = useState(false)
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
     const abortControllerRef = useRef(null)
@@ -122,8 +137,21 @@ export default function ChatPage({ profile }) {
                     tipo_registro: 'entrada_libre',
                     embedding: result.embedding || null,
                     estado_animo: result.analisis?.estado_animo || null,
-                    sintomas_fisicos: result.analisis?.sintomas_fisicos || []
+                    sintomas_fisicos: result.analisis?.sintomas_fisicos || [],
+                    logro_detectado: result.analisis?.logro_detectado || null
                 })
+
+                // If a logro was detected, save it and celebrate! 🎊
+                if (result.analisis?.logro_detectado) {
+                    setShowConfetti(true)
+                    await saveLogro({
+                        user_id: profile.id,
+                        descripcion: result.analisis.logro_detectado,
+                        categoria: detectLogroCategoria(result.analisis),
+                        fuente: 'implicito',
+                        mensaje_origen: text
+                    })
+                }
             }
         } catch (err) {
             if (err.name === 'AbortError') {
@@ -261,6 +289,9 @@ export default function ChatPage({ profile }) {
                     )}
                 </div>
             </div>
+
+            {/* Confetti celebration for micro-logros */}
+            <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
         </div>
     )
 }
