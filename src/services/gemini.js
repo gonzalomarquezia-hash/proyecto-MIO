@@ -156,8 +156,9 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
     ]
 
     try {
+        const MODEL = 'gemini-2.5-flash'
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -177,21 +178,63 @@ export async function sendMessageToGemini(userMessage, conversationHistory = [],
         )
 
         if (!response.ok) {
-            throw new Error(`Gemini API error: ${response.status}`)
+            const errorBody = await response.text()
+            console.error('Gemini API HTTP error:', response.status, errorBody)
+
+            // Provide specific user-facing message based on status
+            let userMessage = 'Tuve un problema técnico.'
+            if (response.status === 429) {
+                userMessage = 'Se alcanzó el límite de uso de la API por ahora. Esperá unos minutos y volvé a intentar.'
+            } else if (response.status === 401 || response.status === 403) {
+                userMessage = 'Hay un problema con la clave de API. Revisá la configuración.'
+            } else if (response.status === 404) {
+                userMessage = 'El modelo de IA no está disponible. Revisá la configuración.'
+            }
+
+            return {
+                respuesta_conversacional: `⚠️ ${userMessage} (Error ${response.status})`,
+                analisis: {
+                    estado_emocional: [],
+                    intensidad_emocional: 0,
+                    voz_identificada: "ninguna_dominante",
+                    pensamiento_automatico: null,
+                    distorsion_cognitiva: [],
+                    contexto: `Error HTTP ${response.status}`,
+                    pensamiento_alternativo: null,
+                    modo_respuesta: "escucha_profunda",
+                    tarea_vinculada: null,
+                    tecnica_aplicada: "ninguna"
+                }
+            }
         }
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text
 
-        if (!text) throw new Error('Empty response from Gemini')
+        if (!text) {
+            console.error('Empty Gemini response. Full data:', JSON.stringify(data))
+            throw new Error('Empty response from Gemini')
+        }
 
-        return JSON.parse(text)
+        // Try to parse the JSON response
+        try {
+            return JSON.parse(text)
+        } catch (parseError) {
+            console.error('JSON parse error. Raw text:', text)
+            // Try to extract JSON from markdown code blocks
+            const jsonMatch = text.match(/```json\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*\}/)
+            if (jsonMatch) {
+                const cleaned = jsonMatch[1] || jsonMatch[0]
+                return JSON.parse(cleaned)
+            }
+            throw parseError
+        }
     } catch (error) {
         console.error('Gemini API error:', error)
         return {
-            respuesta_conversacional: "Perdón, tuve un problema técnico procesando tu mensaje. ¿Podés repetirlo?",
+            respuesta_conversacional: `Perdón, tuve un problema técnico procesando tu mensaje. (${error.message}). ¿Podés repetirlo?`,
             analisis: {
-                estado_emocional: ["error"],
+                estado_emocional: [],
                 intensidad_emocional: 0,
                 voz_identificada: "ninguna_dominante",
                 pensamiento_automatico: null,
