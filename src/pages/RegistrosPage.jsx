@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { FileText, Search, ChevronDown, ChevronUp, Clock, Brain, MessageCircle, Lightbulb, AlertTriangle } from 'lucide-react'
+import { FileText, Search, ChevronDown, ChevronUp, Clock, Brain, MessageCircle, Lightbulb, AlertTriangle, Trash2 } from 'lucide-react'
 import { getEmotionalRecords } from '../services/supabase'
+import { supabase } from '../services/supabase'
 
 const voiceConfig = {
     nino: { emoji: '🌧️', label: 'Niño', color: '#60a5fa' },
@@ -23,6 +24,12 @@ function formatDate(dateStr) {
 function formatTime(dateStr) {
     const d = new Date(dateStr)
     return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Deduplicate array (for emotions that might repeat)
+function uniqueArray(arr) {
+    if (!arr) return []
+    return [...new Set(arr.map(s => s.toLowerCase()))]
 }
 
 // Group records by date
@@ -54,6 +61,24 @@ export default function RegistrosPage({ profile }) {
         const data = await getEmotionalRecords(profile.id, 200)
         setRecords(data)
         setLoading(false)
+    }
+
+    async function handleDelete(e, recordId) {
+        e.stopPropagation() // Don't toggle expand
+        if (!window.confirm('¿Eliminar este registro?')) return
+
+        const { error } = await supabase
+            .from('registros_emocionales')
+            .delete()
+            .eq('id', recordId)
+
+        if (error) {
+            console.error('Error deleting record:', error)
+            return
+        }
+
+        setRecords(prev => prev.filter(r => r.id !== recordId))
+        if (expandedId === recordId) setExpandedId(null)
     }
 
     // Filter records
@@ -139,6 +164,7 @@ export default function RegistrosPage({ profile }) {
                             {group.records.map(record => {
                                 const voice = voiceConfig[record.voz_identificada] || voiceConfig.ninguna_dominante
                                 const isExpanded = expandedId === record.id
+                                const emotions = uniqueArray(record.estado_emocional)
 
                                 return (
                                     <div
@@ -146,12 +172,6 @@ export default function RegistrosPage({ profile }) {
                                         className={`registro-card ${isExpanded ? 'expanded' : ''}`}
                                         onClick={() => setExpandedId(isExpanded ? null : record.id)}
                                     >
-                                        {/* Voice indicator bar */}
-                                        <div
-                                            className="registro-voice-bar"
-                                            style={{ background: voice.color }}
-                                        />
-
                                         <div className="registro-content">
                                             {/* Header row */}
                                             <div className="registro-header">
@@ -169,7 +189,7 @@ export default function RegistrosPage({ profile }) {
                                                     >
                                                         {voice.emoji} {voice.label}
                                                     </span>
-                                                    {record.estado_emocional?.map((emo, j) => (
+                                                    {emotions.map((emo, j) => (
                                                         <span key={j} className="emotion-tag">{emo}</span>
                                                     ))}
                                                     {record.intensidad_emocional > 0 && (
@@ -178,8 +198,17 @@ export default function RegistrosPage({ profile }) {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="registro-expand-icon">
-                                                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                <div className="registro-header-actions">
+                                                    <button
+                                                        className="registro-delete-btn"
+                                                        onClick={(e) => handleDelete(e, record.id)}
+                                                        title="Eliminar registro"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                    <div className="registro-expand-icon">
+                                                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                    </div>
                                                 </div>
                                             </div>
 

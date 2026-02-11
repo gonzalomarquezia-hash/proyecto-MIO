@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Sparkles, Send, Zap, Ear, RotateCcw } from 'lucide-react'
+import { Sparkles, Send, RotateCcw } from 'lucide-react'
 import { sendMessageToGemini } from '../services/gemini'
 import { saveEmotionalRecord, getRecentRecordsForContext, getHabitos } from '../services/supabase'
 
@@ -190,34 +190,7 @@ export default function ChatPage({ profile }) {
                                 <div className="message-bubble">
                                     {msg.content}
                                 </div>
-                                {msg.analysis && (
-                                    <div className="message-meta">
-                                        {msg.analysis.modo_respuesta && (
-                                            <span className={`mode-tag ${msg.analysis.modo_respuesta}`}>
-                                                {msg.analysis.modo_respuesta === 'accion' ? <><Zap size={12} /> Acción</> : <><Ear size={12} /> Escucha</>}
-                                                {msg.analysis.tarea_vinculada && ` → ${msg.analysis.tarea_vinculada}`}
-                                            </span>
-                                        )}
-                                        {msg.analysis.voz_identificada && msg.analysis.voz_identificada !== 'ninguna_dominante' && (
-                                            <span className={`voice-tag ${msg.analysis.voz_identificada}`}>
-                                                {voiceIcons[msg.analysis.voz_identificada]} {voiceLabels[msg.analysis.voz_identificada]}
-                                            </span>
-                                        )}
-                                        {msg.analysis.estado_emocional?.map((emo, j) => (
-                                            <span key={j} className="emotion-tag">{emo}</span>
-                                        ))}
-                                        {msg.analysis.intensidad_emocional > 0 && (
-                                            <span className="emotion-tag">
-                                                Intensidad: {msg.analysis.intensidad_emocional}/100
-                                            </span>
-                                        )}
-                                        {msg.analysis.tecnica_aplicada && msg.analysis.tecnica_aplicada !== 'ninguna' && (
-                                            <span className="technique-tag">
-                                                🧠 {msg.analysis.tecnica_aplicada.replace(/_/g, ' ')}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
+
                                 <span className="message-time">
                                     {msg.timestamp?.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                 </span>

@@ -1230,11 +1230,6 @@ body {
   box-shadow: 0 0 0 1px var(--secondary-glow), var(--shadow);
 }
 
-.registro-voice-bar {
-  width: 4px;
-  flex-shrink: 0;
-}
-
 .registro-content {
   flex: 1;
   padding: 14px 18px;
@@ -1255,6 +1250,42 @@ body {
   gap: 8px;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+.registro-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.registro-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  opacity: 0;
+}
+
+.registro-card:hover .registro-delete-btn {
+  opacity: 1;
+}
+
+.registro-delete-btn:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.registro-expand-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .registro-time {
@@ -1286,11 +1317,6 @@ body {
   padding: 2px 8px;
   background: var(--bg-input);
   border-radius: var(--radius-full);
-}
-
-.registro-expand-icon {
-  color: var(--text-muted);
-  flex-shrink: 0;
 }
 
 .registro-message {
